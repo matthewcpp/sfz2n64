@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/lambertjamesd/sfz2n64/audioconvert"
 	"os"
 	"path/filepath"
 
@@ -91,6 +92,8 @@ func main() {
 	var ext = filepath.Ext(input)
 	var outExt = filepath.Ext(output)
 
+	setupCompression(namedArgs)
+
 	if isRomFile(ext) && isBankFile(outExt) {
 		extractFromRom(input, output)
 	} else if isRomFile(ext) && outExt == ".mid" || outExt == ".midi" {
@@ -105,22 +108,7 @@ func main() {
 
 		convertBank(input, output, args)
 	} else if outExt == ".sounds" {
-		intermediate, _ = namedArgs["--compress"]
-		shouldCompress, _ := intermediate.(bool)
-
-		var compressionSettings *adpcm.CompressionSettings
-
-		if shouldCompress {
-			var err error
-			compressionSettings, err = ParseCompressionSettings(namedArgs)
-
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-		}
-
-		err := convert.WriteSoundBank(output, orderedArgs, compressionSettings)
+		err := convert.WriteSoundBank(output, orderedArgs, audioconvert.GetCompressionSettings())
 
 		if err != nil {
 			fmt.Println(err)
@@ -142,5 +130,22 @@ func main() {
 	} else {
 		fmt.Println(fmt.Sprintf("Invalid input file '%s'. Expected .sfz or .ctl file\n", input))
 		os.Exit(1)
+	}
+}
+
+func setupCompression(namedArgs map[string]interface{}) {
+	intermediate, _ := namedArgs["--compress"]
+	shouldCompress, _ := intermediate.(bool)
+
+	if shouldCompress {
+		var err error
+		compressionSettings, err := ParseCompressionSettings(namedArgs)
+
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		audioconvert.SetCompressionSettings(compressionSettings)
 	}
 }

@@ -9,6 +9,16 @@ import (
 	"github.com/lambertjamesd/sfz2n64/al64"
 )
 
+var compressionSettings *adpcm.CompressionSettings = nil
+
+func SetCompressionSettings(settings *adpcm.CompressionSettings) {
+	compressionSettings = settings
+}
+
+func GetCompressionSettings() *adpcm.CompressionSettings {
+	return compressionSettings
+}
+
 func Compress(wavetable *al64.ALWavetable, codebook *adpcm.Codebook) {
 	if wavetable.Type == al64.AL_RAW16_WAVE {
 		var adpcmLoop *adpcm.Loop = nil
@@ -58,7 +68,7 @@ func CompressWithSettings(wavetable *al64.ALWavetable, fileLocation string, comp
 
 	var codebook *adpcm.Codebook
 
-	if _, err := os.Stat(existingTable); err == nil {
+	if _, err := os.Stat(existingTable); len(fileLocation) > 0 && err == nil {
 		file, err := os.Open(existingTable)
 
 		if err != nil {

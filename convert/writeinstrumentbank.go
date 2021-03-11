@@ -23,7 +23,7 @@ func writeWavetable(state *insConversionState, source interface{}, output *os.Fi
 		var name = "." + string(filepath.Separator) + "sounds" + string(filepath.Separator) + state.getUniqueName(".aifc")
 		var err = audioconvert.WriteAifc(filepath.Join(state.cwd, name), wave, data, state.sampleRate)
 
-		err = audioconvert.WriteWav(filepath.Join(state.cwd, name[0:len(name)-4]+"wav"), wave, data, state.sampleRate)
+		//err = audioconvert.WriteWav(filepath.Join(state.cwd, name[0:len(name)-4]+"wav"), wave, data, state.sampleRate)
 
 		return name, err
 	} else {

@@ -507,6 +507,8 @@ func sfzParseAsBankFile(input *sfz.SfzFile, sfzFilename string) (*al64.ALBankFil
 
 	result.CorrectOverlap()
 
+	compressBankFileSounds(&result)
+
 	return &result, nil
 }
 
@@ -528,6 +530,8 @@ func sfzParseAsSingleInstrument(input *sfz.SfzFile) (*al64.ALBankFile, error) {
 		currentBank.SampleRate = inst.SoundArray[0].Wavetable.FileSampleRate
 	}
 
+	compressBankFileSounds(&result)
+
 	return &result, nil
 }
 
@@ -536,5 +540,22 @@ func Sfz2N64(input *sfz.SfzFile, sfzFilename string) (*al64.ALBankFile, error) {
 		return sfzParseAsSingleInstrument(input)
 	} else {
 		return sfzParseAsBankFile(input, sfzFilename)
+	}
+}
+
+func compressBankFileSounds(bankFile *al64.ALBankFile) {
+	// if user specified compress option we should compress the sounds that are going into the bank
+	compressionSettings := audioconvert.GetCompressionSettings()
+
+	if compressionSettings == nil {
+		return
+	}
+
+	for _, bank := range bankFile.BankArray {
+		for _, instrument := range bank.InstArray {
+			for _, sound := range instrument.SoundArray {
+				audioconvert.CompressWithSettings(sound.Wavetable, "", compressionSettings)
+			}
+		}
 	}
 }
