@@ -14,6 +14,28 @@ import (
 	"github.com/lambertjamesd/sfz2n64/wav"
 )
 
+// Precondition: buffer contains 2 interleaved 16 bit signed channels of PCM data (Little Endian)
+func simpleStereoToMono(buffer []byte) []byte {
+	resampledCount:= len(buffer) / 4
+	resampledBuffer := new(bytes.Buffer)
+
+	reader := bytes.NewReader(buffer)
+	var l int16
+	var r int16
+
+	for i := 0; i < resampledCount; i++ {
+		binary.Read(reader, binary.LittleEndian, &l)
+		binary.Read(reader, binary.LittleEndian, &r)
+
+		newSample := float32(l) + float32(r)
+		newSample *= 0.5
+
+		binary.Write(resampledBuffer, binary.LittleEndian, int16(newSample))
+	}
+
+	return resampledBuffer.Bytes()
+}
+
 func wavToSoundEntry(filename string) (*al64.ALSound, error) {
 	file, err := os.Open(filename)
 
@@ -33,12 +55,18 @@ func wavToSoundEntry(filename string) (*al64.ALSound, error) {
 		return nil, errors.New(fmt.Sprintf("%s should be pcm", filename))
 	}
 
-	if waveFile.Header.NChannels != 1 {
-		return nil, errors.New(fmt.Sprintf("%s should have 1 channel", filename))
-	}
-
 	if waveFile.Header.BitsPerSample != 16 {
 		return nil, errors.New(fmt.Sprintf("%s should have 16 bits per sample", filename))
+	}
+
+	if (waveFile.Header.NChannels == 2) {
+		waveFile.Data = simpleStereoToMono(waveFile.Data)
+		waveFile.Header.NChannels = 1
+		waveFile.Header.ByteRate /= 2
+	}
+
+	if waveFile.Header.NChannels != 1 {
+		return nil, errors.New(fmt.Sprintf("%s should have 1 channel", filename))
 	}
 
 	SwapEndian(waveFile.Data)
