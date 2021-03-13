@@ -430,9 +430,7 @@ func parseSound(state *parseState) {
 					return ok
 				})
 			} else if name.value == "use" {
-				var relativePath = stringFromToken(value.value)
-				relativePath = strings.ReplaceAll(relativePath, "/", string(os.PathSeparator))
-				relativePath = strings.ReplaceAll(relativePath, "\\", string(os.PathSeparator))
+				var relativePath = parseRelativePath(value.value)
 				var waveFilename = filepath.Join(filepath.Dir(state.source.name), relativePath)
 				waveTable, err := state.waveLoader(waveFilename)
 
@@ -469,6 +467,17 @@ func parseSound(state *parseState) {
 	if instrumentName != nil {
 		state.result.StructureByName[instrumentName.value] = &result
 	}
+}
+
+func parseRelativePath(value string) string {
+
+	if value[0] == '"' && value[len(value) - 1] == '"' {
+		value = value[1: len(value) - 1]
+	}
+	value = strings.ReplaceAll(value, "/", string(os.PathSeparator))
+	value = strings.ReplaceAll(value, "\\", string(os.PathSeparator))
+
+	return value
 }
 
 func parseInstrument(state *parseState) {

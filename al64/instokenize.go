@@ -39,30 +39,6 @@ type Token struct {
 	tType tokenType
 }
 
-func stringFromToken(value string) string {
-	var result []rune = make([]rune, 0, len(value))
-	var isEscape = false
-
-	for index, character := range value {
-		if index != 0 && index+1 != len(value) {
-			if isEscape {
-				if character == '\\' {
-					result = append(result, '\\')
-				} else if character == '"' {
-					result = append(result, '"')
-				}
-				isEscape = false
-			} else if character == '\\' {
-				isEscape = true
-			} else {
-				result = append(result, character)
-			}
-		}
-	}
-
-	return string(result)
-}
-
 func tokenizeIdentifier(next rune) (tokenType, tokenizeState) {
 	if unicode.IsLetter(next) || unicode.IsDigit(next) || next == '_' {
 		return tokenTypeNone, tokenizeIdentifier
