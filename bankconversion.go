@@ -31,11 +31,11 @@ func parseInputBank(input string) (*al64.ALBankFile, []byte, bool, error) {
 	if ext == ".sfz" {
 		sfzFile, err := sfz.ParseSfz(input)
 
-		isSingleInstrument = convert.SfzIsSingleInstrument(sfzFile)
-
 		if err != nil {
 			return nil, nil, false, err
 		}
+
+		isSingleInstrument = convert.SfzIsSingleInstrument(sfzFile)
 
 		bankFile, err = convert.Sfz2N64(sfzFile, input)
 
