@@ -205,12 +205,12 @@ func parseNumberValue(state *parseState, token *Token, min int64, max int64) int
 	asInt, err := strconv.ParseInt(token.value, 10, 64)
 
 	if err != nil {
-		state.errors = append(state.errors, ParseError{token, "Exected number value", state.source})
+		state.errors = append(state.errors, ParseError{token, "Expected number value", state.source})
 		return min
 	} else if asInt < min || asInt > max {
 		state.errors = append(state.errors, ParseError{
 			token,
-			fmt.Sprintf("Exected number value in the range %d and %d", int(min), int(max)),
+			fmt.Sprintf("Expected number value in the range %d and %d", int(min), int(max)),
 			state.source,
 		})
 
