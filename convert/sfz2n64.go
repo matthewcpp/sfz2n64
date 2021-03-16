@@ -553,6 +553,10 @@ func compressBankFileSounds(bankFile *al64.ALBankFile) {
 
 	for _, bank := range bankFile.BankArray {
 		for _, instrument := range bank.InstArray {
+			if instrument == nil {
+				continue
+			}
+
 			for _, sound := range instrument.SoundArray {
 				audioconvert.CompressWithSettings(sound.Wavetable, "", compressionSettings)
 			}
